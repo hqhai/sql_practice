@@ -1,10 +1,6 @@
 USE Lanh;
-
-DROP TABLE Customers;
 DROP TABLE Categories;
-DROP TABLE Products;
-DROP TABLE Orders;
-drop table OrderDetails;
+DROP TABLE customers;
 go
 create table customers (
 CustomerID INT PRIMARY KEY IDENTITY(1,1),
@@ -149,3 +145,155 @@ ORDER BY OrderDate DESC, TotalAmount ASC;
 
 SELECT TOP 3 * FROM customers
 ORDER BY CustomerName ASC;
+---dang2----
+SELECT COUNT(*) FROM customers;
+
+select sum(TotalAmount) AS tongtien
+from Orders;
+
+SELECT MAX(Price) AS giacaonhat, MIN(Price) AS giathapnhat
+FROM Products;
+
+SELECT AVG(Price) AS giatrungbinh
+FROM Products;
+
+SELECT CategoryID, COUNT(ProductID) AS sosptrongcategory
+FROM Products
+GROUP BY CategoryID;
+
+---26---
+SELECT
+    MONTH(OrderDate) AS SalesMonth,
+    SUM(TotalAmount) AS tongthang
+FROM
+    Orders
+GROUP BY
+    MONTH(OrderDate)
+ORDER BY
+    SalesMonth;
+---27---
+SELECT CustomerID, COUNT(*) AS soluongdonhang
+FROM Orders
+GROUP BY CustomerID;
+--28-40--
+select TOP 1
+CategoryID,
+COUNT(ProductID) AS spnhieunhat
+from Products
+GROUP BY
+    CategoryID
+ORDER BY
+    spnhieunhat DESC;
+
+
+    SELECT
+    ProductID,
+    SUM(Quantity) AS soluongmoisp
+FROM
+    OrderDetails
+GROUP BY
+    ProductID
+ORDER BY
+    soluongmoisp DESC;
+
+    select 
+    City,
+    count(CustomerID) AS thanhpho
+    from customers
+    group by City
+    having 
+    count(CustomerID) > 1;
+
+   
+SELECT
+    CustomerID,
+    SUM(TotalAmount) AS Tongdonhang
+FROM
+    Orders
+GROUP BY
+    CustomerID;
+
+    SELECT
+    CustomerID,
+    SUM(TotalAmount) AS tonggiatri
+FROM
+    Orders
+GROUP BY
+    CustomerID
+HAVING
+    SUM(TotalAmount) > 5000000;
+
+ SELECT
+    P.CategoryID,
+    SUM(OD.Quantity * P.Price) AS CategoryRevenue
+FROM
+    OrderDetails OD,
+    Products P
+WHERE
+    OD.ProductID = P.ProductID
+GROUP BY
+    P.CategoryID;
+
+
+    SELECT TOP 1
+    FORMAT(OrderDate, 'yyyy-MM') AS SalesMonth,
+    SUM(TotalAmount) AS doanhthuthang
+FROM
+    Orders
+GROUP BY
+    FORMAT(OrderDate, 'yyyy-MM')
+ORDER BY
+    doanhthuthang DESC;
+
+SELECT
+    Status,
+    COUNT(OrderID) AS donhangtheotrangthai
+FROM
+    Orders
+GROUP BY
+    Status;
+
+SELECT
+    CategoryID,
+    AVG(Price) AS giatrungbinh
+FROM
+    Products
+GROUP BY
+    CategoryID;
+
+    SELECT
+    CategoryID,
+    SUM(Stock) AS Tonkho
+FROM
+    Products
+GROUP BY
+    CategoryID
+HAVING
+    SUM(Stock) > 100;
+
+    SELECT
+    City,
+    COUNT(CustomerID) AS khachhangtaiday
+FROM
+    Customers
+GROUP BY
+    City;
+
+   
+SELECT
+    OrderID,
+    SUM(Discount) AS giamgia
+FROM
+    OrderDetails
+GROUP BY
+    OrderID;
+
+    SELECT
+    ProductID,
+    SUM(Quantity) AS tongsolgban
+FROM
+    OrderDetails
+GROUP BY
+    ProductID
+HAVING
+    SUM(Quantity) > 5;
