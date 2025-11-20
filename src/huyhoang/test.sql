@@ -112,7 +112,7 @@ SELECT * FROM Products
 ORDER BY Price ASC;
 
 -- Ex7
-SELECT top 5 * FROM Products
+SELECT TOP 5 * FROM Products
 ORDER BY Price DESC;
 
 -- Ex8
@@ -170,4 +170,106 @@ ORDER BY OrderDate DESC, TotalAmount;
 SELECT TOP 3 * FROM Customers
 ORDER BY CustomerName;
 
+-- Ex21
+SELECT COUNT(CustomerName)
+FROM Customers;
 
+-- Ex22
+SELECT SUM(TotalAmount)
+FROM Orders;
+
+-- Ex23
+SELECT MIN(Price), MAX(Price)
+FROM Products;
+
+-- Ex24
+SELECT AVG(Price), ProductName
+FROM Products
+GROUP BY ProductName;
+
+-- Ex25
+SELECT CategoryID AS 'ID', COUNT(CategoryID)
+FROM Products
+GROUP BY CategoryID;
+
+-- Ex26
+SELECT MONTH(OrderDate) AS 'Month', SUM(TotalAmount)
+FROM Orders
+GROUP BY MONTH(OrderDate);
+
+-- Ex27
+SELECT CustomerID ,COUNT(*)
+FROM Orders
+GROUP BY CustomerID;
+
+-- Ex28
+SELECT TOP 1 CategoryID, COUNT(*)
+FROM Products
+GROUP BY CategoryID
+ORDER BY COUNT(CategoryID) DESC;
+
+-- Ex29
+SELECT ProductID, SUM(UnitPrice)
+FROM OrderDetails
+GROUP BY ProductID;
+
+-- Ex30
+SELECT City
+FROM Customers
+GROUP BY City
+HAVING COUNT(City) > 1;
+
+-- Ex31
+SELECT CustomerID, SUM(TotalAmount)
+FROM Orders
+GROUP BY CustomerID;
+
+-- Ex32
+SELECT CustomerID, SUM(TotalAmount)
+FROM Orders
+GROUP BY CustomerID
+HAVING SUM(TotalAmount) > 500000;
+
+-- Ex33
+SELECT ProductID, Quantity*UnitPrice
+FROM OrderDetails;
+
+-- Ex34
+SELECT TOP 1 MONTH(OrderDate) AS Month, SUM(TotalAmount)
+FROM Orders
+GROUP BY MONTH(OrderDate)
+ORDER BY SUM(TotalAmount) DESC;
+
+-- Ex35
+SELECT Status, COUNT(Status)
+FROM Orders
+GROUP BY Status;
+
+-- Ex36
+SELECT CategoryID, AVG(Price) AS 'Average Price'
+FROM Products
+GROUP BY CategoryID;
+
+-- Ex37
+SELECT CategoryID, SUM(Stock) AS 'Total stock'
+FROM Products
+GROUP BY CategoryID
+HAVING SUM(Stock) > 100;
+
+-- Ex38
+SELECT City, COUNT(City) AS 'Customer count'
+FROM Customers
+GROUP BY City
+ORDER BY COUNT(City) DESC;
+
+-- Ex39
+SELECT OrderID, Quantity*UnitPrice*Discount AS 'Discount price'
+FROM OrderDetails;
+
+-- Ex40
+SELECT ProductID, SUM(Quantity)
+FROM OrderDetails
+GROUP BY ProductID
+HAVING Sum(Quantity) > 5;
+
+-- Ex41
