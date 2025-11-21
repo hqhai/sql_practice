@@ -1,6 +1,9 @@
 USE Lanh;
+DROP TABLE Products;
 DROP TABLE Categories;
 DROP TABLE customers;
+DROP TABLE Orders;
+DROP TABLE OrderDetails;
 go
 create table customers (
 CustomerID INT PRIMARY KEY IDENTITY(1,1),
@@ -297,3 +300,272 @@ GROUP BY
     ProductID
 HAVING
     SUM(Quantity) > 5;
+
+    ---dang3---
+    --41--
+    select 
+    Orders.OrderDate,
+    Orders.OrderID,
+    customers.CustomerName,
+    customers.City
+    from
+    Orders
+    inner join
+    customers on Orders.CustomerID = customers.CustomerID;
+    --42--
+    select
+    OrderDetails.OrderID,
+    OrderDetails.Quantity,
+    OrderDetails.UnitPrice,
+    OrderDetails.Discount,
+    Products.ProductName
+    from
+    OrderDetails
+    inner join
+    Products on OrderDetails.ProductID = Products.ProductID;
+
+    --43--
+select
+Products.ProductName,
+Products.ProductID,
+Products.Price,
+Categories.CategoryName
+from
+Products
+inner join 
+Categories on Products.CategoryID = Categories.CategoryID;
+--44--
+select
+customers.CustomerName AS tenkhachhang,
+COUNT(Orders.OrderID) AS soluongdonhang
+from
+customers
+left join 
+Orders on customers.CustomerID = Orders.CustomerID
+group by
+customers.CustomerID, customers.CustomerName
+order by
+customers.CustomerName;
+
+--45--
+select 
+customers.CustomerName,
+customers.Country,
+customers.Phone
+from
+customers
+left join
+Orders on customers.CustomerID =  Orders.CustomerID
+where
+Orders.OrderID is null;
+
+--46--
+SELECT
+    P.ProductName,
+    ISNULL(SUM(OD.Quantity), 0) AS Total
+FROM
+    Products AS P
+LEFT JOIN
+    OrderDetails AS OD ON P.ProductID = OD.ProductID
+GROUP BY
+    P.ProductID, P.ProductName
+ORDER BY
+    Total DESC;
+
+    --47--
+    SELECT
+    P.ProductName,
+    P.ProductID
+FROM
+    Products AS P
+LEFT JOIN
+    OrderDetails ON P.ProductID = OrderDetails.ProductID
+WHERE
+    OrderDetails.OrderDetailID IS NULL;
+
+    --48--
+    SELECT
+    Orders.OrderID,
+    C.CustomerName,
+    P.ProductName,
+    OD.Quantity,
+    OD.UnitPrice
+FROM
+    Orders 
+INNER JOIN
+    Customers AS C ON Orders.CustomerID = C.CustomerID
+INNER JOIN
+    OrderDetails AS OD ON Orders.OrderID = OD.OrderID
+INNER JOIN
+    Products AS P ON OD.ProductID = P.ProductID
+ORDER BY
+    Orders.OrderID;
+
+    --49--
+    SELECT
+    Categories.CategoryName,
+    SUM(OD.Quantity * OD.UnitPrice) AS Tongdoanhthu
+FROM
+    Categories
+INNER JOIN
+    Products AS P ON Categories.CategoryID = P.CategoryID
+INNER JOIN
+    OrderDetails AS OD ON P.ProductID = OD.ProductID
+GROUP BY
+    Categories.CategoryID, Categories.CategoryName
+ORDER BY
+    Tongdoanhthu DESC;
+ 
+ --50--
+ SELECT DISTINCT
+    customers.CustomerName,
+    customers.CustomerID
+FROM
+    customers 
+INNER JOIN
+    Orders ON customers.CustomerID = Orders.CustomerID
+INNER JOIN
+    OrderDetails ON Orders.OrderID = OrderDetails.OrderID
+INNER JOIN
+    Products ON OrderDetails.ProductID = Products.ProductID
+INNER JOIN
+    Categories ON Products.CategoryID = Categories.CategoryID
+WHERE
+    Categories.CategoryName = 'Electronics';
+
+    --51--
+    SELECT
+    C.CustomerName,
+    ISNULL(SUM(OD.Quantity), 0) AS Tongsanphamdamua
+FROM
+    Customers AS C
+LEFT JOIN
+    Orders AS O ON C.CustomerID = O.CustomerID
+LEFT JOIN
+    OrderDetails AS OD ON O.OrderID = OD.OrderID
+GROUP BY
+    C.CustomerID, C.CustomerName
+ORDER BY
+    Tongsanphamdamua DESC;
+
+    --52--
+
+   SELECT TOP 1
+    Categories.CategoryName,
+    SUM(OrderDetails.Quantity * OrderDetails.UnitPrice) AS Top1
+FROM
+    Categories 
+INNER JOIN
+    Products ON Categories.CategoryID = Products.CategoryID
+INNER JOIN
+    OrderDetails ON Products.ProductID = OrderDetails.ProductID
+GROUP BY
+    Categories.CategoryID, Categories.CategoryName
+ORDER BY
+    Top1  DESC;
+
+    --54--
+    SELECT TOP 1
+    C.CustomerName,
+    COUNT(DISTINCT P.CategoryID) AS khachmuahangkhacnhau
+FROM
+    Customers AS C
+INNER JOIN
+    Orders AS O ON C.CustomerID = O.CustomerID
+INNER JOIN
+    OrderDetails AS OD ON O.OrderID = OD.OrderID
+INNER JOIN
+    Products AS P ON OD.ProductID = P.ProductID
+GROUP BY
+    C.CustomerID, C.CustomerName
+ORDER BY
+    khachmuahangkhacnhau DESC;
+
+    --55--
+    SELECT
+    customers.City,
+    ISNULL(SUM(Orders.TotalAmount), 0) AS doanhthutheotp
+FROM
+    Customers
+LEFT JOIN
+    Orders ON customers.CustomerID = Orders.CustomerID
+GROUP BY
+    customers.City
+ORDER BY
+    doanhthutheotp DESC;
+    --56--
+
+    SELECT TOP 1
+    Products.ProductName,
+    COUNT(DISTINCT O.CustomerID) AS dcmuanhieu
+FROM
+    Products 
+INNER JOIN
+    OrderDetails AS OD ON Products.ProductID = OD.ProductID
+INNER JOIN
+    Orders AS O ON OD.OrderID = O.OrderID
+GROUP BY
+    Products.ProductID, Products.ProductName
+ORDER BY
+    dcmuanhieu DESC;
+
+    --57--
+    SELECT
+    C1.CustomerName AS Customer1,
+    C2.CustomerName AS Customer2,
+    C1.City AS SharedCity
+FROM
+    Customers AS C1
+INNER JOIN
+    Customers AS C2 ON C1.City = C2.City
+WHERE
+    C1.CustomerID <> C2.CustomerID
+    AND C1.CustomerID < C2.CustomerID 
+ORDER BY
+    SharedCity, Customer1;
+
+    --58--
+    select
+    p1.ProductName AS sp1,
+    p2.ProductName AS sp2,
+    p1.Price AS giachung
+    from
+    Products AS p1
+    inner join
+    Products AS p2
+    on
+    p1.Price = p2.Price
+    where
+    p1.ProductID <> p2.ProductID
+    and p1.ProductID < p2.ProductID
+    order by
+    giachung, sp1;
+
+    --59--
+    SELECT DISTINCT
+    Orders.OrderID,
+    customers.CustomerName,
+    Orders.OrderDate,
+    OrderDetails.Discount
+FROM
+    Orders 
+INNER JOIN
+    Customers ON Orders.CustomerID = customers.CustomerID
+INNER JOIN
+    OrderDetails ON Orders.OrderID = OrderDetails.OrderID
+WHERE
+    OrderDetails.Discount > 0;
+
+    --60--
+
+   SELECT
+    Products.ProductName,
+    AVG(OrderDetails.Discount) AS giamgiatbinh
+FROM
+    Products 
+INNER JOIN
+    OrderDetails ON Products.ProductID = OrderDetails.ProductID
+GROUP BY
+    Products.ProductID, Products.ProductName
+ORDER BY
+    giamgiatbinh DESC;
