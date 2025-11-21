@@ -50,12 +50,12 @@ CREATE TABLE OrderDetails (
 );
 
 -- Insert dữ liệu mẫu
-INSERT INTO Customers (CustomerName, Email, Phone, City, Country) VALUES
-('Nguyen Van A', 'a@email.com', '0901234567', 'Hanoi', 'Vietnam'),
-('Tran Thi B', 'b@email.com', '0902234567', 'Ho Chi Minh', 'Vietnam'),
-('Le Van C', 'c@email.com', '0903234567', 'Da Nang', 'Vietnam'),
-('Pham Thi D', 'd@email.com', '0904234567', 'Hanoi', 'Vietnam'),
-('Hoang Van E', 'e@email.com', '0905234567', 'Ho Chi Minh', 'Vietnam');
+INSERT INTO Customers (CustomerID, CustomerName, Email, Phone, City, Country) VALUES
+(1, 'Nguyen Van A', 'a@email.com', '0901234567', 'Hanoi', 'Vietnam'),
+(2, 'Tran Thi B', 'b@email.com', '0902234567', 'Ho Chi Minh', 'Vietnam'),
+(3, 'Le Van C', 'c@email.com', '0903234567', 'Da Nang', 'Vietnam'),
+(4, 'Pham Thi D', 'd@email.com', '0904234567', 'Hanoi', 'Vietnam'),
+(5, 'Hoang Van E', 'e@email.com', '0905234567', 'Ho Chi Minh', 'Vietnam');
 
 INSERT INTO Categories (CategoryName, Description) VALUES
 ('Electronics', 'Electronic devices'),
@@ -85,6 +85,7 @@ INSERT INTO OrderDetails (OrderID, ProductID, Quantity, UnitPrice, Discount) VAL
 (3, 2, 1, 20000000, 0),
 (4, 5, 2, 200000, 0),
 (5, 6, 5, 50000, 0);
+
 
 -- Ex1
 SELECT * FROM Customers;
@@ -273,3 +274,138 @@ GROUP BY ProductID
 HAVING Sum(Quantity) > 5;
 
 -- Ex41
+SELECT Customers.CustomerID, CustomerName
+FROM Customers
+INNER JOIN Orders ON Customers.CustomerID = Orders.CustomerID;
+
+-- Ex42
+SELECT OrderDetails.*, Products.ProductName
+FROM OrderDetails
+INNER JOIN Products ON OrderDetails.ProductID = Products.ProductID;
+
+-- Ex43
+SELECT Products.*, Categories.CategoryName
+FROM Products
+INNER JOIN Categories ON Products.CategoryID = Categories.CategoryID;
+
+-- Ex44
+SELECT Customers.*, COUNT(Orders.CustomerID) AS 'TotalOrder'
+FROM Customers
+LEFT JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+GROUP BY Customers.CustomerID, Customers.CustomerName, Customers.Email, Customers.Phone, Customers.City, Customers.Country
+ORDER BY Customers.CustomerID;
+
+-- Ex45
+SELECT Customers.*
+FROM Customers
+LEFT JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+WHERE Orders.OrderID IS NULL;
+
+-- Ex46
+SELECT Products.*, SUM(OrderDetails.Quantity) AS 'SaleQuantity'
+FROM Products
+LEFT JOIN OrderDetails ON Products.ProductID = OrderDetails.ProductID
+GROUP BY Products.ProductID, Products.ProductName, Products.CategoryID, Products.Price, Products.Stock
+ORDER BY Products.ProductID;
+
+-- Ex47
+SELECT Products.*
+FROM Products
+LEFT JOIN OrderDetails ON Products.ProductID = OrderDetails.ProductID
+WHERE OrderDetails.ProductID IS NULL;
+
+-- Ex48
+SELECT Orders.*, Customers.CustomerName, Products.ProductName, OrderDetails.Quantity
+FROM Orders
+LEFT JOIN Customers ON Orders.CustomerID = Customers.CustomerID
+LEFT JOIN OrderDetails ON Orders.OrderID = OrderDetails.OrderID
+INNER JOIN Products ON OrderDetails.ProductID = Products.ProductID;
+
+-- Ex49
+SELECT Categories.*, OrderDetails.Quantity, SUM(OrderDetails.Quantity * OrderDetails.UnitPrice) AS 'TotalSale'
+FROM Categories
+LEFT JOIN Products ON Categories.CategoryID = Products.CategoryID
+INNER JOIN OrderDetails ON Products.ProductID = OrderDetails.ProductID
+GROUP BY Categories.CategoryID, Categories.CategoryName, Categories.Description, OrderDetails.Quantity
+ORDER BY Categories.CategoryID;
+
+-- Ex50
+SELECT Customers.CustomerName
+FROM Customers
+LEFT JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+INNER JOIN OrderDetails ON Orders.OrderID = OrderDetails.OrderID
+INNER JOIN Products ON OrderDetails.ProductID = Products.ProductID
+INNER JOIN Categories ON Products.CategoryID = Categories.CategoryID
+WHERE Categories.CategoryName IN ('Electronics')
+
+-- Ex51
+SELECT Customers.CustomerName, SUM(OrderDetails.Quantity) AS 'TotalItem'
+FROM Customers
+LEFT JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+INNER JOIN OrderDetails ON Orders.OrderID = OrderDetails.OrderID
+GROUP BY Customers.CustomerName, Customers.CustomerID
+ORDER BY Customers.CustomerID;
+
+-- Ex52
+SELECT TOP 1 Categories.CategoryName, SUM(OrderDetails.Quantity * OrderDetails.UnitPrice) AS 'TotalSale'
+FROM Categories
+LEFT JOIN Products ON Categories.CategoryID = Products.CategoryID
+INNER JOIN OrderDetails ON Products.ProductID = OrderDetails.ProductID
+GROUP BY Categories.CategoryName
+ORDER BY SUM(OrderDetails.Quantity * OrderDetails.UnitPrice) DESC;
+
+-- Ex53 Fail
+SELECT Categories.CategoryName, Products.ProductName, SUM(OrderDetails.Quantity)
+FROM Categories
+INNER JOIN Products ON Categories.CategoryID = Products.CategoryID
+INNER JOIN OrderDetails ON Products.ProductID = OrderDetails.ProductID
+GROUP BY Products.ProductName, Categories.CategoryName
+ORDER BY Categories.CategoryName;
+
+-- Ex54
+SELECT TOP 1 Customers.CustomerName, COUNT(DISTINCT Categories.CategoryID)
+FROM Customers
+INNER JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+INNER JOIN OrderDetails ON Orders.OrderID = OrderDetails.OrderID
+INNER JOIN Products ON OrderDetails.ProductID = Products.ProductID
+INNER JOIN Categories ON Products.CategoryID = Categories.CategoryID
+GROUP BY CustomerName
+ORDER BY COUNT(DISTINCT Categories.CategoryID) DESC;
+
+-- Ex55
+SELECT Customers.City, SUM(OrderDetails.Quantity * OrderDetails.UnitPrice) AS 'TotalSale'
+FROM Customers
+INNER JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+INNER JOIN OrderDetails ON Orders.OrderID = OrderDetails.OrderID
+GROUP BY Customers.City
+ORDER BY Customers.City;
+
+-- Ex56
+SELECT TOP 1 Products.ProductName, COUNT(DISTINCT Orders.CustomerID)
+FROM Products
+INNER JOIN OrderDetails ON Products.ProductID = OrderDetails.ProductID
+INNER JOIN Orders ON OrderDetails.OrderID = Orders.OrderID
+GROUP BY Products.ProductName
+ORDER BY COUNT(DISTINCT Orders.CustomerID) DESC;
+
+-- Ex57
+SELECT A.CustomerName AS CustomerName1, B.CustomerName AS CustomerName2, A.City
+FROM Customers A, Customers B
+WHERE A.CustomerID <> B.CustomerID
+AND A.City = B.City
+ORDER BY A.City;
+
+-- Ex58
+SELECT A.ProductName AS ProductName1, B.ProductName AS ProductName2, A.Price
+FROM Products A, Products B
+WHERE A.ProductName <> B.ProductName
+AND A.Price = B.Price
+ORDER BY A.Price;
+
+-- Ex59
+SELECT OrderDetails.*, Customers.*
+FROM OrderDetails
+LEFT JOIN Customers ON OrderDetails.ProductID = Customers.CustomerID
+WHERE OrderDetails.Discount > 0;
+
+--Ex 60
