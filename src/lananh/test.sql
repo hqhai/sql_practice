@@ -569,3 +569,26 @@ GROUP BY
     Products.ProductID, Products.ProductName
 ORDER BY
     giamgiatbinh DESC;
+    --dang4--
+    --61--
+    select
+    ProductName,
+    Price
+    from
+    Products
+    WHERE
+    Price > (SELECT AVG(Price) FROM Products);
+
+    --63--
+    SELECT TOP 1 OrderID, SUM(Quantity * UnitPrice * (1 - Discount)) AS OrderValue
+FROM OrderDetails
+GROUP BY OrderID
+ORDER BY OrderValue DESC;
+
+--65--
+SELECT TOP 1 customers.CustomerID, customers.CustomerName, COUNT(Orders.OrderID) AS OrderCount
+FROM Customers 
+JOIN Orders ON customers.CustomerID = Orders.CustomerID
+GROUP BY customers.CustomerID, customers.CustomerName
+ORDER BY OrderCount DESC;
+--66--
