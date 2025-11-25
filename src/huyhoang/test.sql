@@ -408,4 +408,91 @@ FROM OrderDetails
 LEFT JOIN Customers ON OrderDetails.ProductID = Customers.CustomerID
 WHERE OrderDetails.Discount > 0;
 
---Ex 60
+-- Ex61
+SELECT * FROM Products
+WHERE Price > (SELECT AVG(Price) FROM Products);
+
+-- Ex62
+
+-- Ex63
+SELECT OD.OrderID, (OD.Quantity * OD.UnitPrice)
+FROM OrderDetails OD
+WHERE (OD.Quantity * OD.UnitPrice) = (SELECT MAX(Quantity * UnitPrice) FROM OrderDetails);
+
+-- Ex64
+SELECT CT.CategoryName, P.ProductName, P.Price
+FROM Products P
+JOIN Categories CT On P.CategoryID = CT.CategoryID
+INNER JOIN (SELECT CategoryID, MAX(Price) AS MaxPrice FROM Products GROUP BY CategoryID)
+AS MaxPrices ON P.CategoryID = MaxPrices.CategoryID AND P.Price = MaxPrices.MaxPrice
+ORDER BY CT.CategoryName;
+
+-- Ex65
+SELECT TOP 1 C.CustomerName, COUNT(OrderID) AS OrderCount
+FROM Customers C
+JOIN Orders ON C.CustomerID = Orders.CustomerID
+GROUP BY C.CustomerID, C.CustomerName
+ORDER BY OrderCount DESC;
+
+-- Ex66
+SELECT P.ProductName, P.Price, CT.CategoryName
+FROM Products P
+JOIN Categories CT ON P.CategoryID = CT.CategoryID
+WHERE P.Price > ALL (SELECT P2.Price FROM Products P2 JOIN Categories CT2 ON P2.CategoryID = CT2.CategoryID
+WHERE CT2.CategoryName = 'Food');
+
+-- Ex67
+SELECT TOP 1 CT.CategoryName, AVG(P.Price)
+FROM Categories CT
+JOIN Products P ON CT.CategoryID = P.CategoryID
+GROUP BY CategoryName
+ORDER BY AVG(P.Price) DESC;
+
+-- Ex68
+SELECT C.CustomerName
+FROM Customers C
+LEFT JOIN Orders O ON C.CustomerID = O.CustomerID
+JOIN OrderDetails OD ON O.OrderID = OD.OrderID
+JOIN Products P ON OD.ProductID = P.ProductID
+JOIN Categories CT ON P.CategoryID = CT.CategoryID
+WHERE CT.CategoryName = 'Electronics'
+GROUP BY CustomerName
+HAVING COUNT(DISTINCT P.ProductID) = (SELECT COUNT(ProductID) FROM Products P2 JOIN Categories CT2 ON P2.CategoryID = CT2.CategoryID
+WHERE CT2.CategoryName = 'Electronics');
+
+-- Ex70
+SELECT P.ProductName, P.Stock
+FROM Products P
+WHERE P.Stock < (SELECT AVG(Stock) FROM Products);
+
+-- Ex72
+SELECT C.CustomerName
+FROM Customers C
+JOIN Orders O ON C.CustomerID = O.CustomerID
+JOIN OrderDetails OD ON O.OrderID = OD.OrderID
+JOIN Products P ON OD.ProductID = P.ProductID
+JOIN Categories CT ON P.CategoryID = CT.CategoryID
+GROUP BY C.CustomerName
+HAVING COUNT(DISTINCT CT.CategoryID) = 1;
+
+-- Ex73
+SELECT CT.CategoryName
+FROM Categories CT
+LEFT JOIN Products P ON CT.CategoryID = P.CategoryID
+LEFT JOIN OrderDetails OD ON P.ProductID = OD.ProductID
+WHERE OD.OrderDetailID = NULL
+GROUP BY CT.CategoryName;
+
+-- Ex74
+SELECT TOP 1 ProductName, Price, ABS(Price - (SELECT AVG(PRICE) FROM Products)) AS AvgPriceDiff
+FROM Products
+ORDER BY AvgPriceDiff ASC;
+
+-- Ex75
+SELECT TOP 1 C.CustomerName, O.OrderDate
+FROM Customers C
+JOIN Orders O ON C.CustomerID = O.CustomerID
+WHERE YEAR(O.OrderDate) = '2024'
+ORDER BY O.OrderDate ASC;
+
+-- Ex76
