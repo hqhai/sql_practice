@@ -591,4 +591,41 @@ FROM Customers
 JOIN Orders ON customers.CustomerID = Orders.CustomerID
 GROUP BY customers.CustomerID, customers.CustomerName
 ORDER BY OrderCount DESC;
---66--
+--67--
+select
+C.CategoryName, 
+    AVG(P.Price) AS AveragePrice
+FROM 
+    Products P
+JOIN 
+    Categories C ON P.CategoryID = C.CategoryID
+GROUP BY 
+    C.CategoryID, C.CategoryName
+HAVING 
+    AVG(P.Price) = (
+    select max(AvgPrice)
+    from(
+    select AVG(Price) AS AvgPrice
+    from
+    Products
+    group by CategoryID
+    ) AS giatbinhspcaonhat
+    );
+
+    --64--
+    SELECT 
+    P.ProductName, 
+    P.Price, 
+    C.CategoryName
+FROM 
+    Products P
+INNER JOIN 
+    Categories C ON P.CategoryID = C.CategoryID
+INNER JOIN 
+    (
+        SELECT CategoryID, MAX(Price) AS MaxPrice
+        FROM Products
+        GROUP BY CategoryID
+    ) AS MaxPrices ON P.CategoryID = MaxPrices.CategoryID 
+                  AND P.Price = MaxPrices.MaxPrice;
+
