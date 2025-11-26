@@ -3,7 +3,6 @@ DROP TABLE Products;
 DROP TABLE Categories;
 DROP TABLE customers;
 DROP TABLE Orders;
-DROP TABLE OrderDetails;
 go
 create table customers (
 CustomerID INT PRIMARY KEY IDENTITY(1,1),
@@ -585,12 +584,39 @@ FROM OrderDetails
 GROUP BY OrderID
 ORDER BY OrderValue DESC;
 
+ --64--
+    SELECT 
+    P.ProductName, 
+    P.Price, 
+    C.CategoryName
+FROM 
+    Products P
+INNER JOIN 
+    Categories C ON P.CategoryID = C.CategoryID
+INNER JOIN 
+    (
+        SELECT CategoryID, MAX(Price) AS MaxPrice
+        FROM Products
+        GROUP BY CategoryID
+    ) AS MaxPrices ON P.CategoryID = MaxPrices.CategoryID 
+                  AND P.Price = MaxPrices.MaxPrice;
+
+
 --65--
 SELECT TOP 1 customers.CustomerID, customers.CustomerName, COUNT(Orders.OrderID) AS OrderCount
 FROM Customers 
 JOIN Orders ON customers.CustomerID = Orders.CustomerID
 GROUP BY customers.CustomerID, customers.CustomerName
 ORDER BY OrderCount DESC;
+
+                          --66--
+                  select * from Products
+                  where Price > ALL (
+                  select Products.Price
+                  from Products
+                  join Categories on Products.CategoryID = Categories.CategoryID
+                  where Categories.CategoryName = 'Food'
+                  );
 --67--
 select
 C.CategoryName, 
@@ -612,20 +638,64 @@ HAVING
     ) AS giatbinhspcaonhat
     );
 
-    --64--
-    SELECT 
-    P.ProductName, 
-    P.Price, 
-    C.CategoryName
-FROM 
-    Products P
-INNER JOIN 
-    Categories C ON P.CategoryID = C.CategoryID
-INNER JOIN 
-    (
-        SELECT CategoryID, MAX(Price) AS MaxPrice
-        FROM Products
-        GROUP BY CategoryID
-    ) AS MaxPrices ON P.CategoryID = MaxPrices.CategoryID 
-                  AND P.Price = MaxPrices.MaxPrice;
+    --68--
+    SELECT
+    C.CustomerID,
+    C.CustomerName
+FROM
+    Customers C
+JOIN
+    Orders O ON C.CustomerID = O.CustomerID
+JOIN
+    OrderDetails OD ON O.OrderID = OD.OrderID
+JOIN
+    Products P ON OD.ProductID = P.ProductID
+JOIN
+    Categories CAT ON P.CategoryID = CAT.CategoryID
+WHERE
+    CAT.CategoryName = 'Electronics' 
+GROUP BY
+    C.CustomerID,
+    C.CustomerName
+HAVING
+    COUNT(DISTINCT P.ProductID) = (SELECT COUNT(DISTINCT ProductID) 
+                                   FROM Products 
+                                   JOIN Categories ON Products.CategoryID = Categories.CategoryID
+                                   WHERE CategoryName = 'Electronics');
+
+
+        --70--
+        select * from Products
+        where Stock < (
+        select AVG(Stock)
+        from Products
+        );
+
+        --71--
+        select OrderID, SUM(Quantity) AS tongsospcuadon
+        from OrderDetails 
+        group by OrderID
+        HAVING SUM(Quantity) > (
+        select AVG(SUM(Quantity))
+        from OrderDetails
+        group by OrderID
+        );
+
+       --72--
+       select 
+       customers.CustomerID,
+       customers.CustomerName
+       from
+       customers
+       join
+       Orders on customers.CustomerID = Orders.CustomerID
+       join 
+       OrderDetails on Orders.OrderID = OrderDetails.OrderID
+       join
+       Products on OrderDetails.ProductID = Products.ProductID
+       group by 
+       customers.CustomerID,
+       customers.CustomerName
+       Having 
+        COUNT(DISTINCT Products.CategoryID) = 1;
 
