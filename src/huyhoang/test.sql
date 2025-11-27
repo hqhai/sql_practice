@@ -413,6 +413,11 @@ SELECT * FROM Products
 WHERE Price > (SELECT AVG(Price) FROM Products);
 
 -- Ex62
+SELECT C.CustomerID, C.CustomerName
+FROM Customers C
+INNER JOIN Orders O ON C.CustomerID = O.CustomerID
+GROUP BY C.CustomerName, C.CustomerID
+HAVING COUNT(O.CustomerID) > 1;
 
 -- Ex63
 SELECT OD.OrderID, (OD.Quantity * OD.UnitPrice)
@@ -465,6 +470,10 @@ SELECT P.ProductName, P.Stock
 FROM Products P
 WHERE P.Stock < (SELECT AVG(Stock) FROM Products);
 
+-- Ex71
+SELECT * FROM OrderDetails
+WHERE Quantity > (SELECT AVG(Quantity) FROM OrderDetails);
+
 -- Ex72
 SELECT C.CustomerName
 FROM Customers C
@@ -496,3 +505,55 @@ WHERE YEAR(O.OrderDate) = '2024'
 ORDER BY O.OrderDate ASC;
 
 -- Ex76
+SELECT P.ProductID, P.ProductName
+FROM Products P
+JOIN OrderDetails OD ON P.ProductID = OD.ProductID
+JOIN Orders O ON OD.OrderID = O.OrderID
+GROUP BY P.ProductID, P.ProductName
+HAVING COUNT(DISTINCT FORMAT(O.OrderDate, 'yyyy-MM')) = (SELECT COUNT(DISTINCT FORMAT(OrderDate, 'yyyy-MM')) FROM Orders);
+
+-- Ex77
+SELECT TOP 1 CT.CategoryName, AVG(OD.Discount)
+FROM Categories CT
+LEFT JOIN Products P ON CT.CategoryID = P.CategoryID
+JOIN OrderDetails OD ON P.ProductID = OD.ProductID
+GROUP BY CategoryName
+ORDER BY AVG(OD.Discount) DESC;
+
+-- Ex79
+SELECT ProductID, ProductName, Price
+FROM Products P
+WHERE P.Price > (SELECT SUM(P2.Price) FROM Products P2
+JOIN Categories CT ON P2.CategoryID = CT.CategoryID
+WHERE CT.CategoryName = 'Food');
+
+-- Ex80
+SELECT TOP 1 WITH TIES O.OrderID, O.TotalAmount
+FROM Orders O
+WHERE O.TotalAmount = (SELECT MAX(TotalAmount) FROM Orders WHERE TotalAmount < (SELECT MAX(TotalAmount) FROM Orders))
+ORDER BY O.TotalAmount DESC;
+
+-- Ex81
+SELECT ProductName, Price, ROW_NUMBER() OVER (ORDER BY Price DESC)
+FROM Products;
+
+-- Ex82
+SELECT C.CustomerID, C.CustomerName,SumTotal.CustomerSpend, DENSE_RANK() OVER(ORDER BY SumTotal.CustomerSpend DESC) AS CustomerRank
+FROM Customers C
+JOIN (SELECT CustomerID, SUM(TotalAmount) AS CustomerSpend
+FROM Orders
+GROUP BY CustomerID) SumTotal ON C.CustomerID = SumTotal.CustomerID
+ORDER BY CustomerRank, CustomerSpend DESC;
+
+-- Ex83
+SELECT CategoryName, CategoryRank, ProductName, TotalQuantity
+FROM (SELECT S1.ProductID, S1.ProductName, S1.TotalQuantity, CT.CategoryName, DENSE_RANK() OVER(PARTITION BY S1.CategoryID ORDER BY S1.TotalQuantity DESC) AS CategoryRank
+FROM (SELECT P.ProductID,P.ProductName, P.CategoryID, SUM(OD.Quantity) AS TotalQuantity 
+FROM Products P
+JOIN OrderDetails OD ON P.ProductID = OD.ProductID
+GROUP BY P.ProductID, P.ProductName, P.CategoryID) S1
+JOIN Categories CT ON S1.CategoryID = CT.CategoryID) SaleRank
+WHERE CategoryRank <=3
+ORDER BY CategoryName, CategoryRank;
+
+-- Ex84
