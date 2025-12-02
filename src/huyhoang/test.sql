@@ -557,3 +557,74 @@ WHERE CategoryRank <=3
 ORDER BY CategoryName, CategoryRank;
 
 -- Ex84
+SELECT MONTH(OrderDate) AS OrderMonth,
+SUM(TotalAmount) AS TotalRev,
+LAG(SUM(TotalAmount), 1) OVER (ORDER BY MONTH(OrderDate)) AS PrevMonRev
+FROM Orders
+GROUP BY MONTH(OrderDate)
+ORDER BY OrderMonth;
+
+-- Ex85
+SELECT ProductID, ProductName, Price, LEAD(Price, 1) OVER(ORDER BY ProductID) AS LeadAmount
+FROM Products;
+
+-- Ex86
+SELECT OrderDate, SUM(TotalAmount) AS DailyRev, SUM(SUM(TotalAmount)) OVER (ORDER BY OrderDate) AS RunningTotalRev
+FROM Orders
+GROUP BY OrderDate
+ORDER BY OrderDate;
+
+-- Ex88
+SELECT CT.CategoryName, P.ProductName, P.Price
+FROM (SELECT ProductName, CategoryID, Price, DENSE_RANK() OVER (PARTITION BY CategoryID ORDER BY Price DESC) AS PriceRank
+FROM Products) P
+INNER JOIN Categories CT ON P.CategoryID = CT.CategoryID
+WHERE P.PriceRank = 2
+ORDER BY CT.CategoryName, P.Price DESC;
+
+-- Ex89
+SELECT O.OrderDate, SUM(OD.Quantity) AS DailyQuan, SUM(SUM(OD.Quantity)) OVER (ORDER BY O.OrderDate) AS RunningTotalQuan
+FROM Orders O
+JOIN OrderDetails OD ON O.OrderID = OD.OrderID
+GROUP BY OrderDate
+ORDER BY OrderDate;
+
+-- Ex90
+WITH MonthRev AS(
+SELECT YEAR(O.OrderDate) AS SaleYear, MONTH(O.OrderDate) AS SaleMonth, SUM(TotalAmount) AS TotalRev
+FROM Orders O
+GROUP BY YEAR(O.OrderDate), MONTH(O.OrderDate))
+SELECT MR.SaleYear,MR.SaleMonth, MR.TotalRev, MAX(TotalRev) OVER () AS HighestMonthRev
+FROM MonthRev MR
+ORDER BY MR.SaleYear,MR.SaleMonth;
+-- Ex91
+
+-- Ex92
+SELECT DISTINCT C.CustomerID, C.CustomerName,
+FIRST_VALUE(O.OrderDate) OVER (PARTITION BY C.CustomerID ORDER BY O.OrderDate) AS FirstOrder,
+LAST_VALUE(O.OrderDate) OVER (PARTITION BY C.CustomerID ORDER BY O.OrderDate ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS LastOrder
+FROM Customers C
+JOIN Orders O ON C.CustomerID = O.CustomerID
+GROUP BY C.CustomerID, C.CustomerName, O.OrderDate
+ORDER BY C.CustomerID;
+
+-- Ex93
+WITH CustomerSpending AS (
+SELECT C.CustomerName, SUM(TotalAmount) AS Spending
+FROM Customers C
+JOIN Orders O ON C.CustomerID = O.CustomerID
+GROUP BY C.CustomerID, C.CustomerName)
+SELECT CustomerName, Spending,NTILE(4) OVER(ORDER BY Spending DESC) AS SpendGroup
+FROM CustomerSpending
+ORDER BY SpendGroup, Spending DESC;
+
+-- Ex94
+WITH MonthRev AS (
+SELECT FORMAT(O.OrderDate, 'yyyy-MM') AS SaleMonth,SUM(TotalAmount) AS Revenue
+FROM Orders O
+GROUP BY FORMAT(O.OrderDate, 'yyyy-MM'))
+SELECT MR.SaleMonth, MR.Revenue, FIRST_VALUE(Revenue) OVER (ORDER BY MR.SaleMonth) AS FirstMonthRev
+FROM MonthRev MR
+ORDER BY MR.SaleMonth;
+
+-- Ex95
