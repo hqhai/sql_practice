@@ -699,3 +699,131 @@ HAVING
        Having 
         COUNT(DISTINCT Products.CategoryID) = 1;
 
+        --73--
+        SELECT C.CategoryID, C.CategoryName
+FROM Categories C
+WHERE C.CategoryID NOT IN (
+    SELECT P.CategoryID
+    FROM Products P
+    WHERE P.ProductID IN (
+        SELECT DISTINCT ProductID FROM OrderDetails
+    )
+);
+
+--74--
+select  top 1 ProductID, ProductName, Price
+from Products
+order by ABS(Price - (SELECT AVG(Price) FROM Products));
+
+--75--
+select top 1 CustomerID, OrderDate
+from Orders
+where year(OrderDate) = 2024
+order by OrderDate ASC; 
+
+--76--
+select OrderDetails.ProductID
+from OrderDetails
+join Orders on OrderDetails.OrderID = Orders.OrderID
+group by OrderDetails.ProductID
+having count(DISTINCT MONTH(Orders.OrderDate)) = 12;
+
+--77--
+SELECT TOP 1 C.CategoryID, C.CategoryName,
+       AVG(OD.Discount) AS tilegiamgia
+FROM Categories C
+JOIN Products P ON C.CategoryID = P.CategoryID
+JOIN OrderDetails OD ON P.ProductID = OD.ProductID
+GROUP BY C.CategoryID, C.CategoryName
+ORDER BY tilegiamgia DESC;
+
+----80--bangnhat
+SELECT *
+FROM Orders
+WHERE TotalAmount = (SELECT MAX(TotalAmount) FROM Orders);
+
+---dang5---
+--81--
+SELECT
+    ProductName,
+    Price,
+    ROW_NUMBER() OVER (ORDER BY Price DESC) AS STT
+FROM
+    Products
+ORDER BY
+    Price DESC;
+
+    --82--
+    select 
+    CustomerID,
+      SUM(TotalAmount) AS Tong_Chi_Tieu
+FROM
+Orders
+group by CustomerID;
+
+--85--
+select
+ProductName,
+Price AS giaganday
+ LEAD(Price,1) over(order by Price DESC) AS giasptiep
+ LEAD(ProductName, 2) over( order by Price DESC) AS tensptiep
+(Price - LEAD(Price, 1) OVER (ORDER BY Price DESC)) AS PriceDifference
+FROM
+    Products
+ORDER BY
+    Price DESC;
+
+    --86--
+    WITH OrderDailyRevenue AS (
+    SELECT
+        O.OrderDate,
+        SUM(OD.Quantity * OD.UnitPrice * (1 - OD.Discount)) AS DailyRevenue
+    FROM
+        Orders O
+    JOIN
+        OrderDetails OD ON O.OrderID = OD.OrderID
+    GROUP BY
+        O.OrderDate
+),
+RunningTotalCalculation AS (
+    --window--
+    SELECT
+        OrderDate,
+        DailyRevenue,
+        SUM(DailyRevenue) OVER (ORDER BY OrderDate) AS CumulativeRevenue
+    FROM
+        OrderDailyRevenue
+)
+SELECT
+    OrderDate,
+    DailyRevenue,
+    CumulativeRevenue AS TongDoanhThuLuyTien
+FROM
+    RunningTotalCalculation
+ORDER BY
+    OrderDate;
+
+
+    --87--
+    SELECT
+    ProductName,
+    CategoryID,
+    Price
+FROM
+    (
+        SELECT
+            ProductName,
+            CategoryID,
+            Price,
+            DENSE_RANK() OVER (
+                PARTITION BY CategoryID
+                ORDER BY Price DESC
+            ) AS PriceRank
+        FROM
+            Products
+    ) AS RankedProducts
+WHERE
+    PriceRank = 2
+ORDER BY
+    CategoryID;
+--88-
