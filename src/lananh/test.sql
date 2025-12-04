@@ -827,3 +827,55 @@ WHERE
 ORDER BY
     CategoryID;
 --88-
+WITH RankedProducts AS (
+    SELECT
+        ProductName,
+        CategoryID,
+        Price,
+        RANK() OVER (
+            PARTITION BY CategoryID
+            ORDER BY Price DESC
+        ) AS Rank
+    FROM
+        Products
+)
+SELECT * FROM RankedProducts WHERE Rank = 2;
+--89--
+select
+OrderDate
+ProductID
+Quantity
+SUM(Quantity) over(
+        PARTITION BY ProductID
+        order by OrderDate
+        ) AS runningtotalQuantity
+from
+Orders
+order by 
+ProductID, OrderDate;
+
+--90--
+WITH MonthlySales AS (
+    SELECT
+        YEAR(OrderDate) AS SaleYear,
+        MONTH(OrderDate) AS SaleMonth,
+        SUM(TotalAmount) AS MonthlyRevenue
+    FROM
+        Orders
+    GROUP BY
+        YEAR(OrderDate),
+        MONTH(OrderDate)
+)
+SELECT
+    SaleYear,
+    SaleMonth,
+    MonthlyRevenue,
+    MAX(MonthlyRevenue) OVER (PARTITION BY SaleYear) AS doanhthucaonhatnam,
+    (MonthlyRevenue * 100.0 / MAX(MonthlyRevenue) OVER (PARTITION BY SaleYear)) AS PercentageOfPeak
+FROM
+    MonthlySales
+ORDER BY
+    SaleYear, SaleMonth;
+
+    --91--
+
